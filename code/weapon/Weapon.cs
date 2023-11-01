@@ -168,7 +168,19 @@ public partial class Weapon : AnimatedEntity
 					.WithAttacker( Owner )
 					.WithWeapon( this );
 
+				if ( tr.Entity == null )
+				{
+					Log.Info( "No hit entity" );
+					continue;
+				}
+
+				Log.Info( "Damanging entioty hit entity" );
+
 				tr.Entity.TakeDamage( damageInfo );
+				// Log the tntiy new health
+				Log.Info( $"Entity health is {tr.Entity.Health}" );
+
+				// Call entity destroy if health below zero
 			}
 		}
 	}

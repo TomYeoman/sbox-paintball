@@ -10,7 +10,7 @@ public partial class Pawn : AnimatedEntity
 
 	[ClientInput]
 	public Vector3 InputDirection { get; set; }
-	
+
 	[ClientInput]
 	public Angles ViewAngles { get; set; }
 
@@ -61,7 +61,7 @@ public partial class Pawn : AnimatedEntity
 	public override Ray AimRay => new Ray( EyePosition, EyeRotation.Forward );
 
 	/// <summary>
-	/// Called when the entity is first created 
+	/// Called when the entity is first created
 	/// </summary>
 	public override void Spawn()
 	{
@@ -101,6 +101,32 @@ public partial class Pawn : AnimatedEntity
 		Animator?.Simulate();
 		ActiveWeapon?.Simulate( cl );
 		EyeLocalPosition = Vector3.Up * (64f * Scale);
+
+
+		// Check for the trigger interaction only when "Use" is pressed
+		if ( !Game.IsServer )
+		{
+			return;
+		}
+
+		if ( Input.Pressed( InputButton.Use ) )
+		{
+
+			// Trace from the player's eyes to see if there's a world entity in front of us
+			var tr = Trace.Ray( EyePosition, EyePosition + EyeRotation.Forward * 5000 )
+				.Ignore( this )
+				.Run();
+
+			var npc = new NpcTest
+			{
+				Position = tr.EndPosition,
+				Rotation = Rotation.LookAt( Owner.Rotation.Backward.WithZ( 0 ) )
+			};
+
+			npc.Tags.Add( "npc" );
+		}
+
+
 	}
 
 	public override void BuildInput()
@@ -153,7 +179,7 @@ public partial class Pawn : AnimatedEntity
 				.Ignore( this )
 				.Radius( 8 )
 				.Run();
-			
+
 			Camera.FirstPersonViewer = null;
 			Camera.Position = tr.EndPosition;
 		}
